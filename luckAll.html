@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şans Merkezi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Modern Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        /* --- TEMEL AYARLAR --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #f1f5f9;
+            transition: background 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        /* --- LIGHT MODE --- */
+        body.light-mode {
+            background-color: #f1f5f9;
+            background-image: radial-gradient(at 0% 0%, hsla(210, 100%, 98%, 1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(230, 100%, 97%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(250, 100%, 98%, 1) 0, transparent 50%);
+            color: #334155;
+        }
+
+        /* --- COMMON COMPONENTS --- */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .glass-panel {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .glass-input {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+
+        .glass-input:focus {
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+        }
+
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .btn-glow:hover::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-item {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        body.light-mode .nav-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            min-width: 200px;
+            display: none;
+            flex-direction: column;
+            gap: 0.25rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+
+        body.light-mode .dropdown-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #cbd5e1;
+            color: #334155;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-menu.show {
+            display: flex;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .tool-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .tool-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- GAME STYLES --- */
+        /* Bomb */
+        .bomb-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        .bomb-cell {
+            height: 60px;
+            /* Fixed height fix */
+            border-radius: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .bomb-cell:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .bomb-cell.safe {
+            background: #10b981;
+            animation: popIn 0.3s forwards;
+            color: white;
+            border-color: #059669;
+        }
+
+        .bomb-cell.boom {
+            background: #ef4444;
+            animation: shake 0.5s;
+            color: white;
+            border-color: #b91c1c;
+        }
+
+        .bomb-cell.disabled {
+            pointer-events: none;
+            opacity: 0.9;
+            cursor: default;
+        }
+
+        body.light-mode .bomb-cell {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+            color: #1e293b;
+        }
+
+        body.light-mode .bomb-cell:hover:not(.disabled) {
+            background: #cbd5e1;
+        }
+
+        /* Dice */
+        .dice-scene {
+            width: 80px;
+            height: 80px;
+            perspective: 400px;
+            margin: 10px;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s ease-out;
+        }
+
+        .cube__face {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background: white;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body:not(.light-mode) .cube__face {
+            background: #1e293b;
+            border-color: #475569;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        body:not(.light-mode) .dot {
+            background: #f1f5f9;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .cube__face--1 {
+            transform: rotateY(0deg) translateZ(40px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cube__face--2 {
+            transform: rotateY(90deg) translateZ(40px);
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+        }
+
+        .cube__face--2 .dot:nth-child(2) {
+            align-self: flex-end;
+        }
+
+        .cube__face--3 {
+            transform: rotateY(180deg) translateZ(40px);
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+        }
+
+        .cube__face--3 .dot:nth-child(2) {
+            align-self: center;
+        }
+
+        .cube__face--3 .dot:nth-child(3) {
+            align-self: flex-end;
+        }
+
+        .cube__face--4 {
+            transform: rotateY(-90deg) translateZ(40px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 12px;
+            gap: 4px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .cube__face--5 {
+            transform: rotateX(90deg) translateZ(40px);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            padding: 8px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .cube__face--5 .dot:nth-child(1) {
+            grid-area: 1 / 1;
+        }
+
+        .cube__face--5 .dot:nth-child(2) {
+            grid-area: 1 / 3;
+        }
+
+        .cube__face--5 .dot:nth-child(3) {
+            grid-area: 2 / 2;
+        }
+
+        .cube__face--5 .dot:nth-child(4) {
+            grid-area: 3 / 1;
+        }
+
+        .cube__face--5 .dot:nth-child(5) {
+            grid-area: 3 / 3;
+        }
+
+        .cube__face--6 {
+            transform: rotateX(-90deg) translateZ(40px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            padding: 10px;
+            gap: 2px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        /* Coin */
+        .coin-scene {
+            width: 120px;
+            height: 120px;
+            perspective: 600px;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .coin__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            border: 4px solid #eab308;
+            background: radial-gradient(circle at 30% 30%, #fef08a, #eab308);
+            color: #713f12;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .coin__face--tails {
+            transform: rotateY(180deg);
+            background: radial-gradient(circle at 30% 30%, #e5e7eb, #9ca3af);
+            border-color: #9ca3af;
+            color: #374151;
+        }
+
+        /* Team Gen & Drag Drop */
+        .flying-card {
+            position: fixed;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            transition: all 0.5s;
+            font-weight: bold;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        body:not(.light-mode) .flying-card {
+            background: #1e293b;
+            color: #f1f5f9;
+            border-color: #475569;
+        }
+
+        body.light-mode .flying-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px dashed rgba(139, 92, 246, 0.5);
+        }
+
+        .team-drop-zone {
+            min-height: 60px;
+            height: 100%;
+            padding-bottom: 1rem;
+        }
+
+        .team-drop-zone.drag-over {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        /* Card Flip */
+        .card-scene {
+            width: 140px;
+            height: 200px;
+            perspective: 600px;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+
+        .playing-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            transform: rotateY(180deg);
+        }
+
+        .playing-card.flipped {
+            transform: rotateY(0deg);
+        }
+
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: white;
+        }
+
+        .card__face--back {
+            background: repeating-linear-gradient(45deg, #1e293b, #1e293b 10px, #334155 10px, #334155 20px);
+            transform: rotateY(180deg);
+            border: 4px solid #fff;
+        }
+
+        .card__face--front {
+            color: #1e293b;
+            font-size: 2rem;
+            flex-direction: column;
+            border: 1px solid #cbd5e1;
+        }
+
+        .red-card {
+            color: #ef4444;
+        }
+
+        /* Bracket Styles */
+        .matchup {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            width: 160px;
+            margin: 4px 0;
+        }
+
+        body.light-mode .matchup {
+            background: white;
+            border-color: #cbd5e1;
+            color: #334155;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .matchup-team {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .matchup-team:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .matchup-team.winner {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        body.light-mode .matchup-team:hover {
+            background: #f1f5f9;
+        }
+
+        .round-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 1rem;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-100 selection:bg-purple-500 selection:text-white pb-20">
+
+    <!-- Navbar -->
+    <div class="fixed top-0 left-0 w-full z-40 bg-slate-900/90 backdrop-blur-md border-b border-white/5 transition-colors duration-300"
+        id="mainNav">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2 font-bold text-xl tracking-tight shrink-0 mr-2 cursor-pointer"
+                    onclick="location.reload()">
+                    <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-1.5 rounded-lg">
+                        <i data-lucide="clover" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span
+                        class="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 hidden sm:block">Şans
+                        Merkezi</span>
+                </div>
+                <div class="flex items-center gap-1 flex-1 justify-center">
+                    <div class="nav-item active" onclick="switchTab('team')"><i data-lucide="users" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">
+                            <a href="team-generetor.html">Takım</a>
+                        </span>
+                    </div>
+                    <div class="nav-item" onclick="switchTab('wheel')"><i data-lucide="aperture" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Çark</span>
+                    </div>
+                    <div class="nav-item" onclick="switchTab('bomb')"><i data-lucide="bomb" class="w-4 h-4"></i> <span
+                            class="hidden sm:inline">Bomba</span></div>
+                    <div class="nav-item" onclick="switchTab('dice')"><i data-lucide="dice-5" class="w-4 h-4"></i> <span
+                            class="hidden sm:inline">Zar</span></div>
+                    <div class="nav-item" onclick="switchTab('coin')"><i data-lucide="coins" class="w-4 h-4"></i> <span
+                            class="hidden sm:inline">Para</span></div>
+                    <div class="relative">
+                        <div class="nav-item" onclick="toggleDropdown()"><span class="font-bold">Diğer</span> <i
+                                data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                        <div id="moreDropdown" class="dropdown-menu">
+                            <div class="nav-item" onclick="switchTab('bracket')"><i data-lucide="trophy"
+                                    class="w-4 h-4"></i> Turnuva</div>
+                            <div class="nav-item" onclick="switchTab('straws')"><i
+                                    data-lucide="align-vertical-distribute-end" class="w-4 h-4"></i> Çöp Çek</div>
+                            <div class="nav-item" onclick="switchTab('bingo')"><i data-lucide="grid-3x3"
+                                    class="w-4 h-4"></i> Tombala</div>
+                            <div class="nav-item" onclick="switchTab('reaction')"><i data-lucide="zap"
+                                    class="w-4 h-4"></i> Refleks</div>
+                            <div class="nav-item" onclick="switchTab('sounds')"><i data-lucide="volume-2"
+                                    class="w-4 h-4"></i> Sesler</div>
+                            <div class="border-t border-white/10 my-1"></div>
+                            <div class="nav-item" onclick="switchTab('number')"><i data-lucide="binary"
+                                    class="w-4 h-4"></i> Sayı</div>
+                            <div class="nav-item" onclick="switchTab('rps')"><i data-lucide="hand-metal"
+                                    class="w-4 h-4"></i> TKM</div>
+                            <div class="nav-item" onclick="switchTab('card')"><i data-lucide="spade"
+                                    class="w-4 h-4"></i> Kart</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 ml-2">
+                    <button onclick="toggleTheme()" class="settings-btn w-9 h-9 flex items-center justify-center">
+                        <i data-lucide="sun" class="w-4 h-4 hidden" id="sunIcon"></i>
+                        <i data-lucide="moon" class="w-4 h-4" id="moonIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 pt-24 md:p-10 md:pt-28">
+
+        <!-- TEAM -->
+        <section id="tool-team" class="tool-section active">
+            <header class="text-center mb-10 fade-in-up">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Takım Oluşturucu</h1>
+                <p class="text-slate-400">Krupiye modu ile adil dağıtım.</p>
+            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-panel rounded-3xl p-6 shadow-xl">
+                        <div class="flex justify-between items-center mb-4"><label
+                                class="flex items-center gap-2 text-indigo-300 font-bold text-sm uppercase"><i
+                                    data-lucide="list" class="w-4 h-4"></i> Liste</label><span id="playerCountBadge"
+                                class="bg-indigo-500/10 text-indigo-300 text-xs py-1 px-2 rounded-full">0 Kişi</span>
+                        </div>
+                        <textarea id="playerInput" placeholder="İsimleri buraya yaz...&#10;Ahmet&#10;Mehmet&#10;Ayşe"
+                            class="glass-input w-full h-48 rounded-xl p-4 text-slate-200 outline-none text-base resize-none mb-3"></textarea>
+                        <div class="flex gap-2 justify-end"><button onclick="fillSample()"
+                                class="text-xs text-slate-400 hover:text-white px-2 py-1">Örnek</button><button
+                                onclick="clearInput()"
+                                class="text-xs text-red-400 hover:text-red-300 px-2 py-1">Temizle</button></div>
+                    </div>
+                    <div class="glass-panel rounded-3xl p-6 shadow-xl">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-3">Takım Sayısı</label>
+                        <div class="grid grid-cols-3 gap-2 bg-slate-900/50 p-1.5 rounded-xl border border-white/5 mb-4">
+                            <button onclick="setTeamCount(2)"
+                                class="team-btn bg-indigo-600 text-white py-2 rounded-lg font-bold shadow-lg"
+                                data-count="2">2</button>
+                            <button onclick="setTeamCount(3)"
+                                class="team-btn text-slate-400 hover:text-white py-2 rounded-lg font-bold"
+                                data-count="3">3</button>
+                            <button onclick="setTeamCount(4)"
+                                class="team-btn text-slate-400 hover:text-white py-2 rounded-lg font-bold"
+                                data-count="4">4</button>
+                        </div>
+                        <div id="teamNamesContainer" class="grid grid-cols-2 gap-2 mb-4"></div>
+                        <button onclick="generateTeams()" id="btnGenerate"
+                            class="btn-glow w-full py-4 rounded-xl font-bold text-lg bg-slate-800 text-slate-500 cursor-not-allowed flex justify-center items-center gap-2"
+                            disabled><i data-lucide="shuffle" class="w-5 h-5"></i> Dağıt</button>
+                    </div>
+                </div>
+                <div class="lg:col-span-7 relative min-h-[400px]">
+                    <div id="emptyState"
+                        class="absolute inset-0 glass-panel rounded-3xl flex flex-col items-center justify-center text-slate-500 border-dashed border-2 border-slate-700/50">
+                        <i data-lucide="layout-grid" class="w-12 h-12 mb-2 opacity-50"></i>
+                        <p class="text-sm">Listeyi doldur ve dağıt.</p>
+                    </div>
+                    <div id="resultsContainer" class="hidden h-full flex flex-col">
+                        <div id="teamsList" class="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHEEL -->
+        <section id="tool-wheel" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Çarkıfelek</h1>
+            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="glass-panel rounded-3xl p-6"><label
+                            class="flex items-center gap-2 text-indigo-300 font-bold text-sm uppercase mb-4"><i
+                                data-lucide="list" class="w-4 h-4"></i> Seçenekler</label><textarea id="wheelInput"
+                            placeholder="Pizza&#10;Burger&#10;Sushi"
+                            class="glass-input w-full h-64 rounded-xl p-4 text-slate-200 outline-none text-base resize-none"></textarea>
+                    </div>
+                </div>
+                <div class="lg:col-span-8 flex flex-col items-center justify-center">
+                    <div class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
+                        <div
+                            class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-10 text-white drop-shadow-lg">
+                            <i data-lucide="chevron-down" class="w-12 h-12 fill-current"></i>
+                        </div>
+                        <canvas id="wheelCanvas" width="400" height="400"
+                            class="w-full h-full rounded-full shadow-2xl transition-transform duration-[4000ms] ease-out"></canvas>
+                        <button onclick="spinWheel()" id="spinBtn"
+                            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white text-indigo-900 font-bold shadow-xl flex items-center justify-center z-20 hover:scale-110 transition-transform">ÇEVİR</button>
+                    </div>
+                    <div id="wheelResult"
+                        class="mt-8 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 min-h-[40px] text-center">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BOMB -->
+        <section id="tool-bomb" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Bomba</h1>
+            </header>
+            <div class="flex flex-col items-center">
+                <div id="bombGrid" class="bomb-grid mb-8"></div>
+                <button onclick="initBombGame()"
+                    class="btn-glow px-8 py-3 rounded-xl font-bold bg-indigo-600 text-white shadow-lg">Yeniden
+                    Başlat</button>
+                <div id="bombStatus" class="mt-6 text-xl font-bold text-slate-300 min-h-[30px] text-center"></div>
+            </div>
+        </section>
+
+        <!-- DICE -->
+        <section id="tool-dice" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Zar At</h1>
+            </header>
+            <div class="flex flex-col items-center">
+                <div class="glass-panel p-2 rounded-xl flex gap-2 mb-10">
+                    <button onclick="setDiceCount(1)"
+                        class="dice-btn w-10 h-10 rounded-lg bg-indigo-600 text-white font-bold transition-colors">1</button>
+                    <button onclick="setDiceCount(2)"
+                        class="dice-btn w-10 h-10 rounded-lg text-slate-400 hover:bg-white/5 font-bold transition-colors">2</button>
+                    <button onclick="setDiceCount(3)"
+                        class="dice-btn w-10 h-10 rounded-lg text-slate-400 hover:bg-white/5 font-bold transition-colors">3</button>
+                    <button onclick="setDiceCount(4)"
+                        class="dice-btn w-10 h-10 rounded-lg text-slate-400 hover:bg-white/5 font-bold transition-colors">4</button>
+                </div>
+                <div id="diceContainer" class="flex flex-wrap justify-center gap-4 mb-10 min-h-[150px]"></div>
+                <button onclick="rollDice()"
+                    class="btn-glow px-10 py-4 rounded-xl font-bold text-xl bg-indigo-600 text-white shadow-lg">Zarla</button>
+                <div id="diceTotal" class="mt-6 text-xl font-mono text-slate-300"></div>
+            </div>
+        </section>
+
+        <!-- COIN -->
+        <section id="tool-coin" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Yazı Tura</h1>
+            </header>
+            <div class="flex flex-col items-center justify-center min-h-[350px]">
+                <div class="coin-scene" onclick="flipCoin()">
+                    <div id="theCoin" class="coin">
+                        <div class="coin__face coin__face--heads flex items-center justify-center"><span
+                                class="coin-text">YAZI</span></div>
+                        <div class="coin__face coin__face--tails flex items-center justify-center"><span
+                                class="coin-text">TURA</span></div>
+                    </div>
+                </div>
+                <button onclick="flipCoin()"
+                    class="mt-12 btn-glow px-10 py-3 rounded-xl font-bold bg-amber-500/20 text-amber-300 border border-amber-500/50 hover:bg-amber-500/30 transition-all">Fırlat</button>
+                <div id="coinResult" class="mt-4 text-2xl font-bold text-white min-h-[32px]"></div>
+            </div>
+        </section>
+
+        <!-- BRACKET -->
+        <section id="tool-bracket" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Turnuva</h1>
+            </header>
+            <div class="flex flex-col items-center max-w-4xl mx-auto">
+                <div class="glass-panel p-6 rounded-3xl w-full mb-6 max-w-md">
+                    <div class="flex gap-4 justify-center mb-4">
+                        <button onclick="setupBracket(4)"
+                            class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-bold">4 Takım</button>
+                        <button onclick="setupBracket(8)"
+                            class="px-4 py-2 rounded-lg bg-slate-700 text-slate-300 text-sm font-bold hover:bg-slate-600">8
+                            Takım</button>
+                    </div>
+                    <textarea id="bracketInput" placeholder="Her satıra bir takım ismi..."
+                        class="glass-input w-full h-32 rounded-xl p-4 text-sm mb-4 resize-none"></textarea>
+                    <button onclick="generateBracket()"
+                        class="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold">Fikstür Oluştur</button>
+                </div>
+                <div id="bracketDisplay" class="w-full overflow-x-auto pb-4 flex justify-center gap-8"></div>
+            </div>
+        </section>
+
+        <!-- OTHER SECTIONS -->
+        <section id="tool-straws" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Çöp Çek</h1>
+                <p class="text-slate-400">Kısa çöpü çeken kaybeder.</p>
+            </header>
+            <div class="flex flex-col items-center">
+                <div class="flex gap-4 mb-8"><button onclick="setupStraws(3)"
+                        class="px-3 py-1 rounded bg-slate-700 text-sm">3 Kişi</button><button onclick="setupStraws(4)"
+                        class="px-3 py-1 rounded bg-slate-700 text-sm">4 Kişi</button><button onclick="setupStraws(5)"
+                        class="px-3 py-1 rounded bg-slate-700 text-sm">5 Kişi</button></div>
+                <div id="strawsContainer"
+                    class="flex items-end justify-center gap-4 h-64 w-full max-w-md bg-slate-800/30 rounded-b-xl border-b border-slate-700/50 relative overflow-hidden px-4">
+                </div>
+                <div id="strawResult" class="mt-4 text-xl font-bold text-rose-400 min-h-[30px]"></div>
+            </div>
+        </section>
+        <section id="tool-bingo" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Tombala</h1>
+            </header>
+            <div class="max-w-2xl mx-auto flex flex-col items-center">
+                <div id="bingoDisplay" class="text-9xl font-black text-white mb-8 drop-shadow-2xl">--</div><button
+                    onclick="drawBingoNum()"
+                    class="btn-glow px-12 py-4 rounded-xl font-bold text-xl bg-indigo-600 text-white mb-8">Sayı
+                    Çek</button>
+                <div id="bingoGrid"
+                    class="grid grid-cols-10 gap-1 w-full p-4 glass-panel rounded-2xl text-xs sm:text-sm font-mono text-slate-500">
+                </div><button onclick="resetBingo()"
+                    class="mt-4 text-sm text-slate-500 hover:text-white underline">Sıfırla</button>
+            </div>
+        </section>
+        <section id="tool-reaction" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Refleks</h1>
+            </header>
+            <div class="max-w-md mx-auto">
+                <div id="reactionBox"
+                    class="w-full h-64 bg-rose-500 rounded-3xl flex items-center justify-center cursor-pointer font-bold text-3xl shadow-lg transition-colors select-none text-white"
+                    onmousedown="handleReactionClick()">Başla</div>
+                <div id="reactionResult" class="mt-4 text-center text-2xl text-slate-300 font-mono"></div>
+            </div>
+        </section>
+        <section id="tool-sounds" class="tool-section">
+            <div class="max-w-lg mx-auto text-center">
+                <h2 class="text-3xl font-bold mb-8">Ses Paneli</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4"><button onclick="playSound('tada')"
+                        class="p-6 glass-panel rounded-xl font-bold hover:bg-white/10 text-emerald-400 text-lg">Tadaa!</button><button
+                        onclick="playSound('boom')"
+                        class="p-6 glass-panel rounded-xl font-bold hover:bg-white/10 text-rose-400 text-lg">Boom</button><button
+                        onclick="playSound('click')"
+                        class="p-6 glass-panel rounded-xl font-bold hover:bg-white/10 text-lg">Tık</button><button
+                        onclick="playSound('whoosh')"
+                        class="p-6 glass-panel rounded-xl font-bold hover:bg-white/10 text-lg">Whoosh</button><button
+                        onclick="playSound('tick')"
+                        class="p-6 glass-panel rounded-xl font-bold hover:bg-white/10 text-lg">Tıkırtı</button><button
+                        onclick="playSound('wrong')"
+                        class="p-6 glass-panel rounded-xl font-bold hover:bg-white/10 text-red-500 text-lg">Hata</button>
+                </div>
+            </div>
+        </section>
+        <section id="tool-number" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Sayı Üretici</h1>
+            </header>
+            <div class="flex flex-col items-center max-w-md mx-auto">
+                <div class="glass-panel p-8 rounded-3xl w-full">
+                    <div class="flex gap-4 mb-6">
+                        <div class="flex-1"><label
+                                class="block text-xs text-indigo-300 font-bold mb-1">MİN</label><input type="number"
+                                id="numMin" value="1"
+                                class="glass-input w-full p-3 rounded-xl text-center text-lg font-mono"></div>
+                        <div class="flex-1"><label
+                                class="block text-xs text-indigo-300 font-bold mb-1">MAX</label><input type="number"
+                                id="numMax" value="100"
+                                class="glass-input w-full p-3 rounded-xl text-center text-lg font-mono"></div>
+                    </div>
+                    <div class="flex justify-center mb-8">
+                        <div id="numberDisplay"
+                            class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 tracking-tighter">
+                            0</div>
+                    </div><button onclick="generateNumber()"
+                        class="btn-glow w-full py-4 rounded-xl font-bold text-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg">Üret</button>
+                </div>
+            </div>
+        </section>
+        <section id="tool-rps" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">TKM</h1>
+            </header>
+            <div class="flex flex-col items-center max-w-lg mx-auto">
+                <div class="flex items-center justify-between w-full mb-10 px-4">
+                    <div class="text-center">
+                        <div id="userMoveDisplay"
+                            class="w-24 h-24 rounded-full glass-panel flex items-center justify-center text-5xl">?</div>
+                        <p class="mt-2 text-sm font-bold text-indigo-300">SEN</p>
+                    </div>
+                    <div class="text-2xl font-black text-slate-500 italic">VS</div>
+                    <div class="text-center">
+                        <div id="compMoveDisplay"
+                            class="w-24 h-24 rounded-full glass-panel flex items-center justify-center text-5xl">?</div>
+                        <p class="mt-2 text-sm font-bold text-rose-300">CPU</p>
+                    </div>
+                </div>
+                <div id="rpsResult" class="text-2xl font-bold text-white mb-8 min-h-[32px]">Seçimini Yap</div>
+                <div class="flex gap-3 md:gap-6"><button onclick="playRPS('rock')"
+                        class="glass-panel p-4 rounded-2xl hover:bg-white/10 hover:scale-110 transition-all flex flex-col items-center gap-2 w-24"><span
+                            class="text-3xl">🪨</span><span class="text-xs font-bold">Taş</span></button><button
+                        onclick="playRPS('paper')"
+                        class="glass-panel p-4 rounded-2xl hover:bg-white/10 hover:scale-110 transition-all flex flex-col items-center gap-2 w-24"><span
+                            class="text-3xl">📄</span><span class="text-xs font-bold">Kağıt</span></button><button
+                        onclick="playRPS('scissors')"
+                        class="glass-panel p-4 rounded-2xl hover:bg-white/10 hover:scale-110 transition-all flex flex-col items-center gap-2 w-24"><span
+                            class="text-3xl">✂️</span><span class="text-xs font-bold">Makas</span></button></div>
+            </div>
+        </section>
+        <section id="tool-card" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">Kart Çek</h1>
+            </header>
+            <div class="flex flex-col items-center justify-center min-h-[350px]">
+                <div class="card-scene" onclick="drawCard()">
+                    <div id="theCard" class="playing-card">
+                        <div class="card__face card__face--front" id="cardFront"></div>
+                        <div class="card__face card__face--back"></div>
+                    </div>
+                </div>
+                <p class="mt-8 text-sm text-slate-500 animate-pulse">Dokun</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        /* --- AUDIO ENGINE --- */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.frequency.setValueAtTime(800, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'tada') {
+                // Major Chord Arpeggio
+                const notes = [523.25, 659.25, 783.99]; // C Major
+                notes.forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = 'triangle'; o.frequency.value = freq;
+                    o.connect(g); g.connect(audioCtx.destination);
+                    g.gain.setValueAtTime(0, now);
+                    g.gain.linearRampToValueAtTime(0.1, now + i * 0.1);
+                    g.gain.linearRampToValueAtTime(0, now + 0.5 + i * 0.1);
+                    o.start(now); o.stop(now + 0.8);
+                });
+            } else if (type === 'boom') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(10, now + 0.5); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.start(now); osc.stop(now + 0.5);
+            } else if (type === 'whoosh') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(800, now + 0.2); gain.gain.linearRampToValueAtTime(0, now + 0.2); osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'tick') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(600, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03); osc.start(now); osc.stop(now + 0.03);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3);
+            }
+        }
+
+        /* --- GLOBAL STATE --- */
+        let currentTab = 'team';
+        let isLightMode = false;
+        let teamCount = 2;
+        let teams = [];
+        let diceCount = 1;
+
+        /* --- INIT --- */
+        window.onload = () => {
+            if (localStorage.getItem('luckCenter_lightMode') === 'true') toggleTheme();
+            renderTeamInputs(2);
+            renderDice();
+            initBombGame();
+            setupBingo();
+            setupStraws(4);
+            drawWheel();
+            lucide.createIcons();
+        };
+
+        /* --- NAVIGATION --- */
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+                if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(tabId)) el.classList.add('active');
+            });
+            document.querySelectorAll('.tool-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tool-${tabId}`).classList.add('active');
+            document.getElementById('moreDropdown').classList.remove('show');
+
+            if (tabId === 'wheel') setTimeout(drawWheel, 10);
+            if (tabId === 'bomb') setTimeout(initBombGame, 10);
+        }
+
+        function toggleDropdown() { document.getElementById('moreDropdown').classList.toggle('show'); }
+        window.onclick = function (e) { if (!e.target.closest('.dropdown-menu') && !e.target.closest('.nav-item')) document.getElementById('moreDropdown').classList.remove('show'); }
+
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle('light-mode', isLightMode);
+            document.getElementById('sunIcon').classList.toggle('hidden', !isLightMode);
+            document.getElementById('moonIcon').classList.toggle('hidden', isLightMode);
+            localStorage.setItem('luckCenter_lightMode', isLightMode);
+            drawWheel();
+        }
+
+        /* --- TEAM GENERATOR --- */
+        function setTeamCount(n) { teamCount = n; renderTeamInputs(n); updateTeamUI(); }
+        function renderTeamInputs(n) {
+            document.getElementById('teamNamesContainer').innerHTML = Array(n).fill(0).map((_, i) => `<input class="team-name-input glass-input w-full p-2 rounded text-sm" placeholder="Takım ${i + 1}">`).join('');
+        }
+        function updateTeamUI() {
+            const val = document.getElementById('playerInput').value;
+            const count = val.split('\n').filter(s => s.trim()).length;
+            document.getElementById('playerCountBadge').innerText = count + " Kişi";
+            const btn = document.getElementById('btnGenerate');
+            if (count < teamCount) { btn.disabled = true; btn.classList.add('bg-slate-800'); }
+            else { btn.disabled = false; btn.classList.remove('bg-slate-800'); btn.classList.add('bg-indigo-600'); }
+        }
+        document.getElementById('playerInput').addEventListener('input', updateTeamUI);
+        function fillSample() { document.getElementById('playerInput').value = "Ali\nVeli\nCan\nCem\nEfe\nEge"; updateTeamUI(); }
+        function clearInput() { if (confirm('Temizle?')) { document.getElementById('playerInput').value = ""; updateTeamUI(); } }
+
+        async function generateTeams() {
+            playSound('whoosh');
+            const players = document.getElementById('playerInput').value.split('\n').map(s => s.trim()).filter(s => s);
+            const teamNames = Array.from(document.querySelectorAll('.team-name-input')).map((inp, i) => inp.value.trim() || `Takım ${i + 1}`);
+            teams = Array.from({ length: teamCount }, (_, i) => ({ name: teamNames[i], members: [] }));
+
+            const shuffled = players.sort(() => Math.random() - 0.5);
+            // Animation logic
+            const startRect = document.getElementById('playerInput').getBoundingClientRect();
+
+            for (let i = 0; i < shuffled.length; i++) {
+                const player = shuffled[i];
+                const teamIdx = i % teamCount;
+                const targetList = document.querySelectorAll('.team-list-ul')[teamIdx];
+
+                if (targetList) {
+                    const card = document.createElement('div');
+                    card.className = 'flying-card';
+                    card.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i> ${player}`;
+                    document.body.appendChild(card);
+                    card.style.left = `${startRect.left + startRect.width / 2}px`;
+                    card.style.top = `${startRect.top + startRect.height / 2}px`;
+                    lucide.createIcons();
+                    await new Promise(r => requestAnimationFrame(r));
+
+                    // Target position logic
+                    // Since elements are hidden initially, we might need to force show container or approximate
+                    // We show results container but hide items until animated
+                    document.getElementById('emptyState').classList.add('hidden');
+                    document.getElementById('resultsContainer').classList.remove('hidden');
+                    // Need to render empty structure first to get positions
+                    if (i === 0) renderTeamsHTML();
+
+                    const targetRect = document.querySelectorAll('.glass-panel')[teamIdx + 1].getBoundingClientRect(); // +1 because first panel is input
+                    const endX = targetRect.left + targetRect.width / 2;
+                    const endY = targetRect.top + 50;
+
+                    card.style.transform = `translate(${endX - parseFloat(card.style.left)}px, ${endY - parseFloat(card.style.top)}px) rotate(${Math.random() * 20 - 10}deg) scale(0.9)`;
+                    card.style.opacity = 0;
+
+                    await new Promise(r => setTimeout(r, 300));
+                    teams[teamIdx].members.push(player);
+                    renderTeamsHTML(); // Re-render with new member
+                    card.remove();
+                }
+                await new Promise(r => setTimeout(r, 50));
+            }
+        }
+
+        function renderTeamsHTML() {
+            const container = document.getElementById('teamsList');
+            container.innerHTML = '';
+            teams.forEach((t, i) => {
+                const colors = ['from-blue-500/20 border-blue-500/30 text-blue-300', 'from-rose-500/20 border-rose-500/30 text-rose-300', 'from-amber-500/20 border-amber-500/30 text-amber-300', 'from-emerald-500/20 border-emerald-500/30 text-emerald-300'];
+                const style = colors[i % colors.length];
+
+                let listItems = t.members.map((m, idx) => `
+                    <li class="draggable-item flex items-center gap-2 p-2 rounded-lg bg-white/5 group" draggable="true" ondragstart="drag(event)" data-team="${i}" data-idx="${idx}">
+                        <span class="w-6 h-6 rounded-full bg-slate-800 text-xs flex items-center justify-center font-bold text-slate-400">${idx + 1}</span>
+                        <span class="font-medium truncate flex-1 text-sm">${m}</span>
+                        <button onclick="removeMember(${i},${idx})" class="text-slate-600 hover:text-red-400 px-1 opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                    </li>
+                `).join('');
+
+                container.innerHTML += `
+                    <div class="glass-panel rounded-2xl overflow-hidden shadow-lg border ${style.split(' ')[1]} flex flex-col h-full" ondragover="allowDrop(event)" ondrop="drop(event, ${i})">
+                        <div class="p-3 bg-gradient-to-r ${style.split(' ')[0]} border-b ${style.split(' ')[1]} flex justify-between items-center">
+                            <h3 class="font-bold ${style.split(' ')[2]} truncate">${t.name}</h3>
+                            <span class="text-xs bg-slate-900/20 px-2 py-1 rounded">${t.members.length}</span>
+                        </div>
+                        <div class="p-3 bg-slate-900/10 flex-1">
+                            <ul class="team-list-ul space-y-1 min-h-[50px]">${listItems}</ul>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function removeMember(tIdx, mIdx) {
+            teams[tIdx].members.splice(mIdx, 1);
+            renderTeamsHTML();
+        }
+
+        /* --- DRAG DROP --- */
+        let draggedItem = null;
+        function drag(ev) { draggedItem = { t: ev.target.dataset.team, i: ev.target.dataset.idx }; }
+        function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('bg-white/5'); }
+        function drop(ev, targetTeamIdx) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('bg-white/5');
+            if (!draggedItem) return;
+            const player = teams[draggedItem.t].members[draggedItem.i];
+            teams[draggedItem.t].members.splice(draggedItem.i, 1);
+            teams[targetTeamIdx].members.push(player);
+            renderTeamsHTML();
+            draggedItem = null;
+        }
+
+        /* --- BOMB --- */
+        let bombIdx = -1;
+        function initBombGame() {
+            const grid = document.getElementById('bombGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            bombIdx = Math.floor(Math.random() * 25);
+            document.getElementById('bombStatus').innerText = "Sıra kimde?";
+            for (let i = 0; i < 25; i++) {
+                const d = document.createElement('div');
+                d.className = 'bomb-cell';
+                d.onclick = function () {
+                    if (this.classList.contains('safe') || this.classList.contains('boom')) return;
+                    if (i === bombIdx) {
+                        this.classList.add('boom'); this.innerText = '💣';
+                        document.getElementById('bombStatus').innerText = "BOOM!";
+                        playSound('boom');
+                        // Reveal all
+                        document.querySelectorAll('.bomb-cell').forEach((c, idx) => {
+                            if (idx !== bombIdx) c.classList.add('disabled');
+                        });
+                    } else {
+                        this.classList.add('safe'); this.innerText = '💎';
+                        playSound('click');
+                    }
+                };
+                grid.appendChild(d);
+            }
+        }
+
+        /* --- WHEEL --- */
+        let isSpinning = false;
+        document.getElementById('wheelInput').addEventListener('input', drawWheel);
+        function getWheelItems() { return document.getElementById('wheelInput').value.split('\n').filter(s => s.trim()); }
+        function drawWheel() {
+            const canvas = document.getElementById('wheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const items = getWheelItems();
+            const w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2;
+            ctx.clearRect(0, 0, w, h);
+            const len = items.length || 1;
+            const step = (2 * Math.PI) / len;
+            const colors = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'];
+
+            for (let i = 0; i < len; i++) {
+                ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, w / 2 - 10, i * step, (i + 1) * step); ctx.lineTo(cx, cy);
+                ctx.fillStyle = items.length ? colors[i % colors.length] : (isLightMode ? '#e2e8f0' : '#1e293b');
+                ctx.fill(); ctx.stroke();
+                if (items.length) {
+                    ctx.save(); ctx.translate(cx, cy); ctx.rotate(i * step + step / 2);
+                    ctx.textAlign = "right"; ctx.fillStyle = "white"; ctx.font = "bold 16px Inter";
+                    ctx.fillText(items[i], w / 2 - 30, 5); ctx.restore();
+                }
+            }
+        }
+        function spinWheel() {
+            if (isSpinning) return;
+            const items = getWheelItems();
+            if (!items.length) return;
+            isSpinning = true;
+            const canvas = document.getElementById('wheelCanvas');
+            const rot = 1440 + Math.random() * 360;
+            canvas.style.transition = "transform 4s cubic-bezier(0.2,0.8,0.2,1)";
+            canvas.style.transform = `rotate(${rot}deg)`;
+
+            let ticks = 0;
+            const tickInt = setInterval(() => { if (ticks++ < 15) playSound('tick'); else clearInterval(tickInt); }, 200);
+
+            setTimeout(() => {
+                isSpinning = false;
+                const deg = rot % 360;
+                const seg = 360 / items.length;
+                // 0 is right, arrow is top (270). Rotation is clockwise.
+                const winIdx = Math.floor(((270 - deg + 360) % 360) / seg);
+                document.getElementById('wheelResult').innerText = `🎉 ${items[winIdx]} 🎉`;
+                playSound('tada');
+            }, 4000);
+        }
+
+        /* --- DICE LOGIC --- */
+        function setDiceCount(n) { diceCount = n; renderDice(); }
+        function renderDice() {
+            const c = document.getElementById('diceContainer');
+            c.innerHTML = '';
+            for (let i = 0; i < diceCount; i++) c.innerHTML += `<div class="dice-scene"><div class="cube" id="die-${i}"><div class="cube__face cube__face--1 face-1"><div class="dot"></div></div><div class="cube__face cube__face--2 face-2"><div class="dot"></div><div class="dot"></div></div><div class="cube__face cube__face--3 face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="cube__face cube__face--4 face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="cube__face cube__face--5 face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div class="cube__face cube__face--6 face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`;
+        }
+        function rollDice() {
+            playSound('whoosh');
+            let total = 0;
+            for (let i = 0; i < diceCount; i++) {
+                const res = Math.floor(Math.random() * 6) + 1;
+                total += res;
+                const x = [0, 0, 0, 0, 0, -90, 90][res];
+                const y = [0, 0, -90, 180, 90, 0, 0][res];
+                const rx = Math.floor(Math.random() * 4) * 360;
+                const ry = Math.floor(Math.random() * 4) * 360;
+                document.getElementById(`die-${i}`).style.transform = `rotateX(${x + rx}deg) rotateY(${y + ry}deg)`;
+            }
+            setTimeout(() => document.getElementById('diceTotal').innerText = "Toplam: " + total, 1000);
+        }
+
+        /* --- COIN LOGIC --- */
+        function flipCoin() {
+            playSound('whoosh');
+            const coin = document.getElementById('theCoin');
+            const isHeads = Math.random() < 0.5;
+            const rot = 1800 + (isHeads ? 0 : 180);
+            coin.style.transform = `rotateY(${rot}deg)`;
+            setTimeout(() => {
+                document.getElementById('coinResult').innerText = isHeads ? "YAZI" : "TURA";
+                playSound('tada');
+            }, 3000);
+        }
+
+        /* --- BRACKET LOGIC --- */
+        function setupBracket(n) { document.getElementById('bracketInput').value = Array(n).fill('').map((_, i) => `Takım ${i + 1}`).join('\n'); }
+        function generateBracket() {
+            playSound('click');
+            const teams = document.getElementById('bracketInput').value.split('\n').filter(s => s.trim());
+            const display = document.getElementById('bracketDisplay');
+            // Simple render for bracket
+            let html = '<div class="round-column">';
+            for (let i = 0; i < teams.length; i += 2) {
+                html += `<div class="matchup"><div class="matchup-team">${teams[i] || '-'}</div><div class="matchup-team">${teams[i + 1] || '-'}</div></div>`;
+            }
+            html += '</div>';
+            if (teams.length > 2) {
+                html += '<div class="round-column">';
+                for (let i = 0; i < teams.length / 2; i += 2) html += `<div class="matchup"><div class="matchup-team">?</div><div class="matchup-team">?</div></div>`;
+                html += '</div>';
+            }
+            html += '<div class="round-column"><div class="matchup"><div class="matchup-team winner">🏆</div></div></div>';
+            display.innerHTML = html;
+        }
+
+        /* --- STRAWS --- */
+        function setupStraws(n) {
+            const c = document.getElementById('strawsContainer');
+            c.innerHTML = '<div class="absolute bottom-0 w-full h-12 bg-slate-700 rounded-b-xl z-20 flex items-center justify-center text-xs text-white/50">ÇEK</div>';
+            const short = Math.floor(Math.random() * n);
+            document.getElementById('strawResult').innerText = "";
+            for (let i = 0; i < n; i++) {
+                const s = document.createElement('div');
+                s.className = "w-3 bg-amber-300 rounded-t cursor-pointer transition-transform duration-500 relative z-10 hover:-translate-y-2";
+                s.style.height = "150px";
+                s.onclick = function () {
+                    if (this.classList.contains('pulled')) return;
+                    this.classList.add('pulled');
+                    this.style.transform = "translateY(-50px)";
+                    if (i === short) {
+                        this.style.height = "80px";
+                        this.style.backgroundColor = "#f43f5e";
+                        document.getElementById('strawResult').innerText = "KISA ÇÖP!";
+                        playSound('wrong');
+                    } else {
+                        playSound('whoosh');
+                    }
+                }
+                c.appendChild(s);
+            }
+        }
+
+        /* --- BINGO --- */
+        let bingoNums = [];
+        function setupBingo() {
+            const g = document.getElementById('bingoGrid');
+            g.innerHTML = '';
+            for (let i = 1; i <= 90; i++) {
+                const d = document.createElement('div');
+                d.className = 'aspect-square flex items-center justify-center bg-white/5 rounded text-slate-500';
+                d.id = `bingo-${i}`;
+                d.innerText = i;
+                g.appendChild(d);
+            }
+        }
+        function drawBingoNum() {
+            if (bingoNums.length >= 90) return;
+            let n; do { n = Math.floor(Math.random() * 90) + 1; } while (bingoNums.includes(n));
+            bingoNums.push(n);
+            document.getElementById('bingoDisplay').innerText = n;
+            const cell = document.getElementById(`bingo-${n}`);
+            cell.classList.remove('bg-white/5', 'text-slate-500');
+            cell.classList.add('bg-indigo-600', 'text-white', 'font-bold');
+            playSound('tada');
+        }
+        function resetBingo() { bingoNums = []; document.getElementById('bingoDisplay').innerText = "--"; setupBingo(); }
+
+        /* --- REACTION --- */
+        let reactState = 'wait', rTimer, rStart;
+        function handleReactionClick() {
+            const b = document.getElementById('reactionBox');
+            if (reactState === 'wait') {
+                reactState = 'ready'; b.className = 'w-full h-64 bg-amber-500 rounded-3xl flex items-center justify-center cursor-pointer font-bold text-3xl shadow-lg text-white'; b.innerText = 'Bekle...';
+                rTimer = setTimeout(() => {
+                    reactState = 'go';
+                    b.className = 'w-full h-64 bg-emerald-500 rounded-3xl flex items-center justify-center cursor-pointer font-bold text-3xl shadow-lg text-white';
+                    b.innerText = 'TIKLA!'; rStart = Date.now();
+                }, 2000 + Math.random() * 3000);
+            } else if (reactState === 'ready') {
+                clearTimeout(rTimer); reactState = 'wait';
+                b.className = 'w-full h-64 bg-rose-500 rounded-3xl flex items-center justify-center cursor-pointer font-bold text-3xl shadow-lg text-white';
+                b.innerText = 'Erken! Tekrar.'; playSound('wrong');
+            } else if (reactState === 'go') {
+                const t = Date.now() - rStart; reactState = 'wait';
+                b.className = 'w-full h-64 bg-blue-500 rounded-3xl flex items-center justify-center cursor-pointer font-bold text-3xl shadow-lg text-white';
+                b.innerText = `${t} ms\nTekrar`; playSound('tada');
+            }
+        }
+
+        /* --- NUMBER --- */
+        function generateNumber() {
+            const min = parseInt(document.getElementById('numMin').value);
+            const max = parseInt(document.getElementById('numMax').value);
+            const disp = document.getElementById('numberDisplay');
+            let c = 0;
+            const i = setInterval(() => {
+                disp.innerText = Math.floor(Math.random() * (max - min + 1)) + min;
+                if (c++ > 15) { clearInterval(i); playSound('tada'); }
+            }, 50);
+        }
+
+        /* --- RPS --- */
+        function playRPS(u) {
+            const icons = { rock: '🪨', paper: '📄', scissors: '✂️' };
+            const moves = ['rock', 'paper', 'scissors'];
+            const c = moves[Math.floor(Math.random() * 3)];
+            document.getElementById('userMoveDisplay').innerText = icons[u];
+            document.getElementById('compMoveDisplay').innerText = icons[c];
+            let res = "";
+            if (u === c) res = "Berabere";
+            else if ((u === 'rock' && c === 'scissors') || (u === 'paper' && c === 'rock') || (u === 'scissors' && c === 'paper')) { res = "Kazandın!"; playSound('tada'); }
+            else { res = "Kaybettin"; playSound('wrong'); }
+            document.getElementById('rpsResult').innerText = res;
+        }
+
+        /* --- CARD --- */
+        function drawCard() {
+            const f = document.getElementById('cardFront');
+            const vals = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const suits = ['♠', '♥', '♣', '♦'];
+            const v = vals[Math.floor(Math.random() * 13)];
+            const s = suits[Math.floor(Math.random() * 4)];
+            const col = (s === '♥' || s === '♦') ? 'text-rose-500' : 'text-slate-900';
+            document.getElementById('theCard').classList.toggle('flipped');
+            setTimeout(() => {
+                f.innerHTML = `<div class="absolute top-2 left-2 ${col}">${v}</div><div class="text-6xl ${col}">${s}</div><div class="absolute bottom-2 right-2 rotate-180 ${col}">${v}</div>`;
+                playSound('whoosh');
+            }, 200);
+        }
+    </script>
+</body>
+
+</html>

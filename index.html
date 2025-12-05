@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takım Oluşturucu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modern Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        /* --- TEMEL AYARLAR (DARK MODE DEFAULT) --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            /* slate-900 */
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #f1f5f9;
+            /* slate-100 */
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+        }
+
+        /* --- LIGHT MODE OVERRIDES --- */
+        body.light-mode {
+            background-color: #f1f5f9;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(210, 100%, 98%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(230, 100%, 97%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(250, 100%, 98%, 1) 0, transparent 50%);
+            color: #334155;
+        }
+
+        body.light-mode h1 span.bg-clip-text {
+            background-image: linear-gradient(to right, #4f46e5, #7c3aed, #db2777) !important;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light-mode .glass-panel {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .glass-input {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+
+        body.light-mode .glass-input:focus {
+            background: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        body.light-mode .text-slate-400 {
+            color: #64748b !important;
+        }
+
+        body.light-mode .text-slate-500 {
+            color: #475569 !important;
+        }
+
+        body.light-mode .text-slate-300 {
+            color: #334155 !important;
+        }
+
+        body.light-mode .text-indigo-300 {
+            color: #4f46e5 !important;
+        }
+
+        body.light-mode .bg-slate-900\/40 {
+            background-color: #ffffff;
+        }
+
+        body.light-mode .bg-slate-800 {
+            background-color: #ffffff;
+        }
+
+        body.light-mode .bg-slate-900\/60 {
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+
+        body.light-mode .border-slate-700 {
+            border-color: #cbd5e1;
+        }
+
+        body.light-mode .text-slate-200 {
+            color: #1e293b !important;
+        }
+
+        body.light-mode #emptyState {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .team-btn.bg-slate-700 {
+            background-color: #e2e8f0 !important;
+            color: #64748b !important;
+            box-shadow: none;
+        }
+
+        body.light-mode .team-btn.bg-slate-700:hover {
+            background-color: #cbd5e1 !important;
+            color: #1e293b !important;
+        }
+
+        body.light-mode .team-btn.bg-indigo-600 {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+        }
+
+        body.light-mode .team-drop-zone.drag-over {
+            background-color: #f1f5f9;
+            border: 2px dashed #94a3b8;
+        }
+
+        body.light-mode #btnSample,
+        body.light-mode #btnClear {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        body.light-mode #btnSample:hover {
+            background-color: #e2e8f0;
+            color: #334155;
+        }
+
+        /* --- DİĞER STİLLER --- */
+        .fade-in-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        textarea::-webkit-scrollbar,
+        div::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        textarea::-webkit-scrollbar-track,
+        div::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        textarea::-webkit-scrollbar-thumb,
+        div::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover,
+        div::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        body.light-mode textarea::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+        }
+
+        body.light-mode textarea::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .btn-glow:hover::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.1s;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px dashed rgba(139, 92, 246, 0.5);
+            transform: scale(1.02);
+        }
+
+        .team-drop-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-height: 50px;
+            height: 100%;
+            padding-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .team-drop-zone.drag-over {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 8px;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        body.light-mode .settings-btn {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            color: #475569;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .settings-btn:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* --- MODAL (POPUP) STYLES --- */
+        #customModal {
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        #customModal.hidden-modal {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #customModal .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #customModal:not(.hidden-modal) .modal-content {
+            transform: scale(1);
+        }
+
+        /* Light Mode Modal */
+        body.light-mode #modalBox {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body.light-mode #modalTitle {
+            color: #1e293b;
+        }
+
+        body.light-mode #modalMessage {
+            color: #475569;
+        }
+
+        body.light-mode #modalCancelBtn {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        body.light-mode #modalCancelBtn:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        /* --- UÇAN KART ANİMASYONU --- */
+        .flying-card {
+            position: fixed;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform-origin: center center;
+        }
+
+        body:not(.light-mode) .flying-card {
+            background: #1e293b;
+            color: #f1f5f9;
+            border-color: #475569;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-mode .flying-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-100 selection:bg-purple-500 selection:text-white">
+
+    <!-- Navbar -->
+    <div class="fixed top-0 left-0 w-full z-40 bg-slate-900/90 backdrop-blur-md border-b border-white/5 transition-colors duration-300"
+        id="mainNav">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html"
+                    class="flex items-center gap-2 font-bold text-xl tracking-tight shrink-0 mr-2 cursor-pointer text-decoration-none">
+                    <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-1.5 rounded-lg">
+                        <i data-lucide="clover" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span
+                        class="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 hidden sm:block">Şans
+                        Merkezi</span>
+                </a>
+                <div class="flex items-center gap-1 flex-1 justify-center">
+                    <div class="nav-item"><a href="index.html" class="flex items-center gap-1"><i data-lucide="users"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Takım</span></a></div>
+                    <div class="nav-item"><a href="wheel.html" class="flex items-center gap-1"><i data-lucide="aperture"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Çark</span></a></div>
+                    <div class="nav-item"><a href="bomb.html" class="flex items-center gap-1"><i data-lucide="bomb"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Bomba</span></a></div>
+                    <div class="nav-item"><a href="dice.html" class="flex items-center gap-1"><i data-lucide="dice-5"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Zar</span></a></div>
+                    <div class="nav-item"><a href="coin.html" class="flex items-center gap-1"><i data-lucide="coins"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Para</span></a></div>
+                    <div class="relative">
+                        <div class="nav-item" onclick="toggleDropdown()"><span class="font-bold">Diğer</span> <i
+                                data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                        <div id="moreDropdown" class="dropdown-menu">
+                            <a href="bracket.html" class="nav-item"><i data-lucide="trophy" class="w-4 h-4"></i>
+                                Turnuva</a>
+                            <a href="straws.html" class="nav-item"><i data-lucide="align-vertical-distribute-end"
+                                    class="w-4 h-4"></i> Çöp Çek</a>
+                            <a href="bingo.html" class="nav-item"><i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                                Tombala</a>
+                            <a href="reaction.html" class="nav-item"><i data-lucide="zap" class="w-4 h-4"></i>
+                                Refleks</a>
+                            <a href="sounds.html" class="nav-item"><i data-lucide="volume-2" class="w-4 h-4"></i>
+                                Sesler</a>
+                            <div class="border-t border-white/10 my-1"></div>
+                            <a href="number.html" class="nav-item"><i data-lucide="binary" class="w-4 h-4"></i> Sayı</a>
+                            <a href="rps.html" class="nav-item"><i data-lucide="hand-metal" class="w-4 h-4"></i> TKM</a>
+                            <a href="card.html" class="nav-item"><i data-lucide="spade" class="w-4 h-4"></i> Kart</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ayarlar Paneli (Sağ Üst) -->
+    <div class="fixed top-20 right-4 z-50 flex gap-2">
+        <button id="langBtn" class="settings-btn font-bold text-xs w-10 h-10 flex items-center justify-center"
+            title="Change Language">
+            TR
+        </button>
+        <button id="themeBtn" class="settings-btn w-10 h-10 flex items-center justify-center" title="Toggle Theme">
+            <i data-lucide="sun" class="w-5 h-5 hidden" id="sunIcon"></i>
+            <i data-lucide="moon" class="w-5 h-5" id="moonIcon"></i>
+        </button>
+    </div>
+
+    <!-- Arkaplan Efektleri -->
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[100px]"></div>
+    </div>
+
+    <!-- --- CUSTOM MODAL --- -->
+    <div id="customModal" class="fixed inset-0 z-[100] flex items-center justify-center px-4 hidden-modal">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+
+        <!-- Modal Content -->
+        <div id="modalBox"
+            class="modal-content relative bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl z-10">
+            <div class="flex flex-col items-center text-center">
+                <div
+                    class="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-4">
+                    <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                </div>
+                <h3 id="modalTitle" class="text-xl font-bold text-white mb-2">Onay Gerekiyor</h3>
+                <p id="modalMessage" class="text-slate-400 mb-6">Bu işlemi yapmak istediğinize emin misiniz?</p>
+
+                <div class="flex gap-3 w-full">
+                    <button id="modalCancelBtn"
+                        class="flex-1 py-2.5 rounded-xl bg-slate-700 text-slate-300 font-medium hover:bg-slate-600 transition-colors">
+                        Vazgeç
+                    </button>
+                    <button id="modalConfirmBtn"
+                        class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/30">
+                        Onayla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 pt-24 md:p-10 md:pt-28">
+
+        <!-- Header -->
+        <header class="text-center mb-12 fade-in-up">
+            <div
+                class="inline-flex items-center justify-center p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-2xl shadow-indigo-500/30 mb-6 transform hover:scale-105 transition-transform duration-300">
+                <i data-lucide="trophy" class="w-10 h-10 text-white"></i>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-3">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-indigo-200"
+                    data-i18n="appTitle">
+                    Takım Oluşturucu
+                </span>
+            </h1>
+            <p class="text-slate-400 text-lg font-medium max-w-xl mx-auto leading-relaxed" data-i18n="appSubtitle">
+                Adil, hızlı ve hafızalı kura sistemi.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Sol Kolon: Giriş ve Ayarlar (5 birim) -->
+            <div class="lg:col-span-5 space-y-6 fade-in-up" style="animation-delay: 100ms;">
+
+                <!-- Giriş Kartı -->
+                <div class="glass-panel rounded-3xl p-1 shadow-2xl">
+                    <div class="bg-slate-900/40 rounded-[20px] p-6 h-full">
+                        <div class="flex justify-between items-center mb-4">
+                            <label
+                                class="flex items-center gap-2 text-indigo-300 font-bold text-sm uppercase tracking-wider">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                                <span data-i18n="playerList">Oyuncu Listesi</span>
+                            </label>
+                            <span id="playerCountBadge"
+                                class="bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs py-1 px-3 rounded-full font-mono">
+                                0 <span data-i18n="person">Kişi</span>
+                            </span>
+                        </div>
+
+                        <textarea id="playerInput"
+                            placeholder="İsimleri buraya yapıştır...&#10;Ahmet&#10;Mehmet&#10;Ayşe"
+                            class="glass-input w-full h-64 rounded-xl p-4 text-slate-200 placeholder-slate-600 outline-none text-base leading-relaxed resize-none font-medium mb-3"></textarea>
+
+                        <div class="flex justify-between items-center">
+                            <p class="text-[11px] text-slate-500 font-medium" data-i18n="autoSave">Otomatik kaydedilir.
+                            </p>
+                            <div class="flex gap-2">
+                                <button id="btnSample"
+                                    class="text-xs font-semibold text-slate-400 hover:text-white transition-colors py-1 px-2 rounded hover:bg-slate-700/50 btn-secondary"
+                                    data-i18n="sample">
+                                    Örnek
+                                </button>
+                                <button id="btnClear"
+                                    class="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors py-1 px-2 rounded hover:bg-red-500/10 hidden"
+                                    data-i18n="clear">
+                                    Temizle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ayarlar Kartı -->
+                <div class="glass-panel rounded-3xl p-6 shadow-xl">
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"
+                            data-i18n="teamCount">
+                            Takım Sayısı
+                        </label>
+                        <div class="grid grid-cols-3 gap-2 bg-slate-900/50 p-1.5 rounded-xl border border-white/5 mb-4">
+                            <button data-count="2"
+                                class="team-btn py-2.5 rounded-lg text-sm font-bold transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">2</button>
+                            <button data-count="3"
+                                class="team-btn py-2.5 rounded-lg text-sm font-bold transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5">3</button>
+                            <button data-count="4"
+                                class="team-btn py-2.5 rounded-lg text-sm font-bold transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5">4</button>
+                        </div>
+
+                        <!-- Takım İsimleri Giriş Alanı -->
+                        <div id="teamNamesContainer" class="space-y-2 mb-4">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                                data-i18n="teamNames">
+                                Takım İsimleri (Opsiyonel)
+                            </label>
+                            <div id="teamNameInputs" class="grid grid-cols-2 gap-2">
+                                <!-- JS ile doldurulacak -->
+                            </div>
+                        </div>
+
+                        <!-- Dinamik Bilgi -->
+                        <div id="teamInfoContainer" class="mt-4 hidden fade-in-up">
+                            <div
+                                class="flex items-center gap-3 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+                                <i data-lucide="info" class="w-4 h-4 text-indigo-400 flex-shrink-0"></i>
+                                <p id="teamInfoText" class="text-sm text-indigo-200"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="btnGenerate"
+                        class="btn-glow w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5"
+                        disabled>
+                        <span id="btnIcon"><i data-lucide="shuffle" class="w-5 h-5"></i></span>
+                        <span id="btnText" data-i18n="generate">Kura Çek</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon: Sonuçlar (7 birim) -->
+            <div class="lg:col-span-7 space-y-8 fade-in-up" style="animation-delay: 200ms;">
+
+                <!-- Ana Sonuç Alanı -->
+                <div class="relative min-h-[400px]">
+                    <!-- Boş Durum -->
+                    <div id="emptyState"
+                        class="absolute inset-0 glass-panel rounded-3xl flex flex-col items-center justify-center text-slate-500 border-dashed border-2 border-slate-700/50 bg-slate-800/20">
+                        <div class="bg-slate-800 p-6 rounded-full mb-6 border border-white/5 shadow-2xl">
+                            <i data-lucide="layout-grid" class="w-12 h-12 text-slate-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-300 mb-2" data-i18n="emptyTitle">Kura Bekleniyor</h3>
+                        <p class="text-sm opacity-60 max-w-xs text-center" data-i18n="emptyDesc">Listeyi doldur, takım
+                            isimlerini belirle ve kurayı başlat.</p>
+                    </div>
+
+                    <!-- Sonuçlar -->
+                    <div id="resultsContainer" class="hidden h-full flex flex-col">
+                        <div class="flex justify-between items-end mb-6 px-2">
+                            <div>
+                                <h2 class="text-3xl font-black text-white flex items-center gap-3">
+                                    <span data-i18n="results">Sonuçlar</span>
+                                    <span class="flex h-3 w-3 relative">
+                                        <span
+                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                    </span>
+                                </h2>
+                                <p class="text-slate-400 text-sm mt-1 font-medium" data-i18n="resultDesc">Sürükle bırak,
+                                    sil veya yeni oyuncu ekle.</p>
+                            </div>
+                            <button id="btnCopy"
+                                class="group flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all text-sm font-semibold border border-white/10 hover:border-white/20 backdrop-blur-sm">
+                                <span id="copyText" data-i18n="copy">Kopyala</span>
+                                <i data-lucide="copy" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </div>
+
+                        <!-- Takım Kartları Grid -->
+                        <div id="teamsList" class="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+                            <!-- Takımlar buraya JS ile eklenecek -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geçmiş Bölümü -->
+                <div id="historySection" class="hidden border-t border-white/5 pt-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-300 flex items-center gap-2">
+                            <i data-lucide="history" class="w-5 h-5 text-purple-400"></i>
+                            <span data-i18n="history">Geçmiş Kuralar</span>
+                        </h3>
+                        <button id="btnClearHistory" class="text-xs text-slate-500 hover:text-red-400 transition-colors"
+                            data-i18n="clearHistory">
+                            Geçmişi Temizle
+                        </button>
+                    </div>
+                    <div id="historyList" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                        <!-- Geçmiş kartları buraya -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Mantığı -->
+    <script>
+        // --- Navigation Dropdown ---
+        function toggleDropdown() {
+            document.getElementById('moreDropdown').classList.toggle('show');
+        }
+        window.onclick = function (e) {
+            if (!e.target.closest('.dropdown-menu') && !e.target.closest('.nav-item'))
+                document.getElementById('moreDropdown').classList.remove('show');
+        }
+
+        // --- Değişkenler ---
+        let teamCount = 2;
+        let teams = [];
+        let isAnimating = false;
+        let historyData = [];
+        let currentLang = 'tr';
+        let isLightMode = false;
+        const STORAGE_KEY = 'teamGenerator_v3';
+
+        // --- Çeviri Sözlüğü ---
+        const translations = {
+            tr: {
+                appTitle: "Takım Oluşturucu",
+                appSubtitle: "Adil, hızlı ve hafızalı kura sistemi.",
+                playerList: "Oyuncu Listesi",
+                person: "Kişi",
+                autoSave: "Otomatik kaydedilir.",
+                sample: "Örnek",
+                clear: "Temizle",
+                teamCount: "TAKIM SAYISI",
+                teamNames: "TAKIM İSİMLERİ (OPSİYONEL)",
+                generate: "Kura Çek",
+                generating: "Kura Çekiliyor...",
+                emptyTitle: "Kura Bekleniyor",
+                emptyDesc: "Listeyi doldur, takım isimlerini belirle ve kurayı başlat.",
+                results: "Sonuçlar",
+                resultDesc: "Sürükle bırak, sil veya yeni oyuncu ekle.",
+                copy: "Kopyala",
+                copied: "Kopyalandı!",
+                history: "Geçmiş Kuralar",
+                clearHistory: "Geçmişi Temizle",
+                team: "Takım",
+                player: "Oyuncu",
+                matchFormat: "Maç Formatı:",
+                perTeam: "Takım Başına:",
+                extra: "yedek",
+                confirmClear: "Listeyi temizlemek istediğine emin misin?",
+                confirmClearHistory: "Geçmiş kuraları silmek istiyor musun?",
+                addPlayerBtn: "Oyuncu Ekle",
+                placeholderName: "İsim girin...",
+                placeholderInput: "İsimleri buraya yapıştır...\nAhmet\nMehmet\nAyşe",
+                samplePlayers: "Barış\nAhmet\nCan\nBurak\nEngin\nFatih\nGökhan\nHakan\nİlker\nCem\nOğuz\nSelim",
+                placeholderTeamName: "Takım {0} Adı",
+                modalTitle: "Onay Gerekiyor",
+                modalCancel: "Vazgeç",
+                modalConfirm: "Onayla"
+            },
+            en: {
+                appTitle: "Team Generator",
+                appSubtitle: "Fair, fast and persistent draw system.",
+                playerList: "Player List",
+                person: "Person",
+                autoSave: "Auto-saved.",
+                sample: "Sample",
+                clear: "Clear",
+                teamCount: "TEAM COUNT",
+                teamNames: "TEAM NAMES (OPTIONAL)",
+                generate: "Generate",
+                generating: "Generating...",
+                emptyTitle: "Waiting for Draw",
+                emptyDesc: "Fill the list, set team names and start the draw.",
+                results: "Results",
+                resultDesc: "Drag & drop, delete or add new players.",
+                copy: "Copy",
+                copied: "Copied!",
+                history: "Draw History",
+                clearHistory: "Clear History",
+                team: "Team",
+                player: "Player",
+                matchFormat: "Format:",
+                perTeam: "Per Team:",
+                extra: "reserve",
+                confirmClear: "Are you sure you want to clear the list?",
+                confirmClearHistory: "Do you want to delete history?",
+                addPlayerBtn: "Add Player",
+                placeholderName: "Enter name...",
+                placeholderInput: "Paste names here...\nJohn\nJane\nDoe",
+                samplePlayers: "John\nJane\nMike\nSarah\nDavid\nEmily\nChris\nAnna\nTom\nJerry\nKate\nLeo",
+                placeholderTeamName: "Team {0} Name",
+                modalTitle: "Confirm Action",
+                modalCancel: "Cancel",
+                modalConfirm: "Confirm"
+            }
+        };
+
+        // --- DOM Elementleri ---
+        const playerInput = document.getElementById('playerInput');
+        const playerCountBadge = document.getElementById('playerCountBadge');
+        const btnSample = document.getElementById('btnSample');
+        const btnClear = document.getElementById('btnClear');
+        const teamButtons = document.querySelectorAll('.team-btn');
+        const teamInfoContainer = document.getElementById('teamInfoContainer');
+        const teamInfoText = document.getElementById('teamInfoText');
+        const btnGenerate = document.getElementById('btnGenerate');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnText = document.getElementById('btnText');
+        const emptyState = document.getElementById('emptyState');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const teamsList = document.getElementById('teamsList');
+        const btnCopy = document.getElementById('btnCopy');
+        const copyText = document.getElementById('copyText');
+        const teamNameInputs = document.getElementById('teamNameInputs');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+        const btnClearHistory = document.getElementById('btnClearHistory');
+        const langBtn = document.getElementById('langBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        // Modal Elements
+        const customModal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+
+        // --- Custom Modal Function ---
+        function showConfirm(message) {
+            return new Promise((resolve) => {
+                const t = translations[currentLang];
+                modalTitle.textContent = t.modalTitle;
+                modalMessage.textContent = message;
+                modalCancelBtn.textContent = t.modalCancel;
+                modalConfirmBtn.textContent = t.modalConfirm;
+
+                customModal.classList.remove('hidden-modal');
+
+                const handleConfirm = () => {
+                    closeModal();
+                    resolve(true);
+                };
+
+                const handleCancel = () => {
+                    closeModal();
+                    resolve(false);
+                };
+
+                modalConfirmBtn.onclick = handleConfirm;
+                modalCancelBtn.onclick = handleCancel;
+
+                customModal.onclick = (e) => {
+                    if (e.target === customModal) handleCancel();
+                };
+            });
+        }
+
+        function closeModal() {
+            customModal.classList.add('hidden-modal');
+            modalConfirmBtn.onclick = null;
+            modalCancelBtn.onclick = null;
+            customModal.onclick = null;
+        }
+
+        // --- Dil ve Tema ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            langBtn.textContent = lang.toUpperCase();
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+
+            playerInput.placeholder = translations[lang].placeholderInput;
+
+            const inputs = document.querySelectorAll('.team-name-input');
+            inputs.forEach((input, idx) => {
+                input.placeholder = translations[lang].placeholderTeamName.replace('{0}', idx + 1);
+            });
+
+            updateUI();
+            if (teams.length > 0) renderTeams(teams);
+            if (historyData.length > 0) renderHistory();
+
+            saveData();
+        }
+
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.body.classList.remove('light-mode');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            saveData();
+        }
+
+        // --- LocalStorage ---
+        function loadData() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                if (data.players) playerInput.value = data.players;
+                if (data.teamCount) {
+                    teamCount = data.teamCount;
+                    updateTeamButtons(teamCount);
+                }
+                if (data.history) {
+                    historyData = data.history;
+                    renderHistory();
+                }
+                if (data.lang) setLanguage(data.lang);
+                if (data.isLightMode) {
+                    isLightMode = false;
+                    toggleTheme();
+                }
+                renderTeamNameInputs(teamCount, data.customNames || []);
+            } else {
+                renderTeamNameInputs(teamCount);
+                setLanguage('tr');
+            }
+            updateUI();
+        }
+
+        function saveData() {
+            const customNames = [];
+            document.querySelectorAll('.team-name-input').forEach(input => {
+                customNames.push(input.value);
+            });
+
+            const data = {
+                players: playerInput.value,
+                teamCount: teamCount,
+                customNames: customNames,
+                history: historyData,
+                lang: currentLang,
+                isLightMode: isLightMode
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // --- Helpers ---
+        function getPlayerList() {
+            return playerInput.value.split(/[\n,]/).map(name => name.trim()).filter(name => name.length > 0);
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function formatDate(dateString) {
+            const locale = currentLang === 'tr' ? 'tr-TR' : 'en-US';
+            return new Date(dateString).toLocaleDateString(locale, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderTeamNameInputs(count, existingNames = []) {
+            teamNameInputs.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const val = existingNames[i] || '';
+                const ph = translations[currentLang].placeholderTeamName.replace('{0}', i + 1);
+                const inputHtml = `
+                    <input type="text" 
+                        class="team-name-input glass-input w-full rounded-lg p-2 text-sm text-slate-200 placeholder-slate-600 outline-none" 
+                        placeholder="${ph}" 
+                        value="${val}"
+                        oninput="saveData()"
+                    >
+                `;
+                teamNameInputs.insertAdjacentHTML('beforeend', inputHtml);
+            }
+        }
+
+        function updateTeamButtons(count) {
+            teamButtons.forEach(btn => {
+                const btnCount = parseInt(btn.dataset.count);
+                if (btnCount === count) {
+                    btn.className = 'team-btn py-2.5 rounded-lg text-sm font-bold transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 transform scale-105';
+                } else {
+                    btn.className = 'team-btn py-2.5 rounded-lg text-sm font-bold transition-all duration-300 text-slate-400 hover:text-white hover:bg-white/5 bg-slate-700 text-slate-300';
+                }
+            });
+        }
+
+        function updateUI() {
+            const players = getPlayerList();
+            const count = players.length;
+            const t = translations[currentLang];
+
+            playerCountBadge.innerHTML = `${count} ${t.person}`;
+
+            if (count > 0) {
+                btnClear.classList.remove('hidden');
+                playerCountBadge.classList.replace('text-indigo-300', 'text-emerald-300');
+                playerCountBadge.classList.replace('bg-indigo-500/10', 'bg-emerald-500/10');
+                playerCountBadge.classList.replace('border-indigo-500/20', 'border-emerald-500/20');
+            } else {
+                btnClear.classList.add('hidden');
+                playerCountBadge.classList.replace('text-emerald-300', 'text-indigo-300');
+                playerCountBadge.classList.replace('bg-emerald-500/10', 'bg-indigo-500/10');
+                playerCountBadge.classList.replace('border-emerald-500/20', 'border-indigo-500/20');
+            }
+
+            if (count > 0) {
+                teamInfoContainer.classList.remove('hidden');
+                const perTeamCount = Math.floor(count / teamCount);
+                const extraPlayers = count % teamCount;
+
+                let html = '';
+                if (teamCount === 2) {
+                    html = `${t.matchFormat} <span class="font-bold ml-1">${perTeamCount} vs ${perTeamCount}</span>`;
+                } else {
+                    html = `${t.perTeam} <span class="font-bold ml-1">~${perTeamCount} ${t.person}</span>`;
+                }
+
+                if (extraPlayers > 0) {
+                    html += ` <span class="text-indigo-400 text-xs ml-2 border border-indigo-500/30 px-1.5 py-0.5 rounded">+${extraPlayers} ${t.extra}</span>`;
+                }
+                teamInfoText.innerHTML = html;
+            } else {
+                teamInfoContainer.classList.add('hidden');
+            }
+
+            if (count >= teamCount && !isAnimating) {
+                btnGenerate.disabled = false;
+                btnGenerate.className = "btn-glow w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:translate-y-[-2px] active:scale-[0.98] active:translate-y-0 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-xl shadow-indigo-600/30 cursor-pointer border border-white/10";
+            } else {
+                btnGenerate.disabled = true;
+                btnGenerate.className = "w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all bg-slate-800/50 text-slate-600 cursor-not-allowed border border-white/5";
+            }
+        }
+
+        // --- Drag & Drop ---
+        function initDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable-item');
+            const containers = document.querySelectorAll('.team-drop-zone');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => { draggable.classList.add('dragging'); });
+                draggable.addEventListener('dragend', () => { draggable.classList.remove('dragging'); updateTeamsFromDOM(); });
+            });
+
+            containers.forEach(container => {
+                container.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    container.classList.add('drag-over');
+                    const afterElement = getDragAfterElement(container, e.clientY);
+                    const draggable = document.querySelector('.dragging');
+                    if (afterElement == null) {
+                        container.appendChild(draggable);
+                    } else {
+                        container.insertBefore(draggable, afterElement);
+                    }
+                });
+                container.addEventListener('dragleave', () => { container.classList.remove('drag-over'); });
+                container.addEventListener('drop', () => { container.classList.remove('drag-over'); updateTeamCounts(); });
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function updateTeamsFromDOM() {
+            const teamContainers = document.querySelectorAll('.team-container');
+            teams = [];
+            teamContainers.forEach(container => {
+                const teamName = container.querySelector('.team-name-display').innerText.trim();
+                const members = [];
+                container.querySelectorAll('.player-name-span').forEach(span => members.push(span.innerText));
+                teams.push({ name: teamName, members: members });
+            });
+            updateTeamCounts();
+        }
+
+        function updateTeamCounts() {
+            const t = translations[currentLang];
+            document.querySelectorAll('.team-container').forEach((container, index) => {
+                const countSpan = container.querySelector('.player-count-badge');
+                const players = container.querySelectorAll('.draggable-item').length;
+                countSpan.innerText = `${players} ${t.player}`;
+                container.querySelectorAll('.player-number-badge').forEach((badge, idx) => badge.innerText = idx + 1);
+            });
+        }
+
+        // --- Team Management ---
+        window.removePlayer = function (teamIndex, playerIndex) {
+            updateTeamsFromDOM();
+            teams[teamIndex].members.splice(playerIndex, 1);
+            renderTeams(teams);
+            initDragAndDrop();
+            saveData();
+        }
+
+        window.showAddPlayerInput = function (teamIndex) {
+            document.getElementById(`btn-add-player-${teamIndex}`).classList.add('hidden');
+            const inputGroup = document.getElementById(`input-group-player-${teamIndex}`);
+            inputGroup.classList.remove('hidden');
+            const input = document.getElementById(`input-player-${teamIndex}`);
+            input.focus();
+        }
+
+        window.cancelAddPlayer = function (teamIndex) {
+            document.getElementById(`btn-add-player-${teamIndex}`).classList.remove('hidden');
+            const inputGroup = document.getElementById(`input-group-player-${teamIndex}`);
+            inputGroup.classList.add('hidden');
+            document.getElementById(`input-player-${teamIndex}`).value = '';
+        }
+
+        window.handleEnterKey = function (event, teamIndex) {
+            if (event.key === 'Enter') confirmAddPlayer(teamIndex);
+            if (event.key === 'Escape') cancelAddPlayer(teamIndex);
+        }
+
+        window.confirmAddPlayer = function (teamIndex) {
+            const input = document.getElementById(`input-player-${teamIndex}`);
+            const name = input.value;
+            if (name && name.trim()) {
+                updateTeamsFromDOM();
+                teams[teamIndex].members.push(name.trim());
+                renderTeams(teams);
+                initDragAndDrop();
+                saveData();
+            } else {
+                input.focus();
+            }
+        }
+
+        // --- YENİ ANİMASYON MANTIĞI ---
+        async function generateTeams() {
+            const players = getPlayerList();
+            if (players.length < teamCount) return;
+
+            isAnimating = true;
+            updateUI();
+            const t = translations[currentLang];
+
+            const originalIcon = btnIcon.innerHTML;
+            btnIcon.innerHTML = `<div class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>`;
+            btnText.textContent = t.generating;
+
+            resultsContainer.classList.remove('hidden'); // Görünür yapıyoruz ama içi boş olacak
+            emptyState.classList.add('hidden');
+
+            // 1. Takım İsimlerini Al
+            const currentNames = [];
+            document.querySelectorAll('.team-name-input').forEach((input, idx) => {
+                currentNames.push(input.value.trim() || translations[currentLang].placeholderTeamName.replace('{0}', idx + 1));
+            });
+
+            // 2. Takımları Boş Olarak Başlat ve Render Et
+            teams = Array.from({ length: teamCount }, (_, i) => ({
+                name: currentNames[i],
+                members: []
+            }));
+            renderTeams(teams);
+
+            // 3. Oyuncuları Karıştır
+            const shuffledPlayers = shuffleArray(players);
+
+            // 4. Dağıtıcı Animasyonu (Asenkron)
+            await distributePlayersWithAnimation(shuffledPlayers);
+
+            // 5. Bitiş
+            addToHistory(teams);
+            isAnimating = false;
+            btnIcon.innerHTML = originalIcon;
+            lucide.createIcons();
+            btnText.textContent = t.generate;
+
+            updateUI();
+            saveData();
+            initDragAndDrop();
+        }
+
+        async function distributePlayersWithAnimation(players) {
+            const animationDuration = 500; // ms
+
+            // Başlangıç (Sol panel)
+            const sourceRect = playerInput.getBoundingClientRect();
+            const startX = sourceRect.left + sourceRect.width / 2;
+            const startY = sourceRect.top + sourceRect.height / 2;
+
+            for (let i = 0; i < players.length; i++) {
+                const player = players[i];
+                const teamIndex = i % teamCount;
+                const targetList = document.querySelectorAll('.team-drop-zone')[teamIndex];
+
+                if (targetList) {
+                    // Uçan Kart
+                    const card = document.createElement('div');
+                    card.className = 'flying-card';
+                    card.innerHTML = `<i data-lucide="user" class="w-4 h-4"></i> ${player}`;
+                    document.body.appendChild(card);
+
+                    // Başlangıç Konumu
+                    card.style.left = `${startX}px`;
+                    card.style.top = `${startY}px`;
+                    lucide.createIcons();
+
+                    // Reflow trigger
+                    await new Promise(r => requestAnimationFrame(r));
+
+                    // Hedef Konumu
+                    const targetRect = targetList.getBoundingClientRect();
+                    // Rastgele varyasyon
+                    const randomX = Math.random() * 40 - 20;
+                    const randomY = Math.random() * 40 - 20;
+
+                    // Hedef: Listenin ortası + rastgelelik
+                    const endX = targetRect.left + targetRect.width / 2 + randomX - (card.offsetWidth / 2);
+                    const endY = targetRect.top + targetRect.height / 2 + randomY;
+
+                    card.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(${Math.random() * 360}deg) scale(0.8)`;
+                    card.style.opacity = '0'; // Giderken sönümlen
+
+                    // Uçuş Süresi
+                    await new Promise(resolve => setTimeout(resolve, animationDuration * 0.7));
+
+                    // Listeye Ekle
+                    teams[teamIndex].members.push(player);
+                    appendPlayerToTeamDOM(targetList, player, teamIndex, teams[teamIndex].members.length - 1);
+
+                    card.remove();
+                }
+
+                // Kartlar arası bekleme
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+        }
+
+        function appendPlayerToTeamDOM(container, player, teamIdx, playerIdx) {
+            const li = document.createElement('li');
+            li.className = "draggable-item flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors group/item fade-in-up";
+            li.draggable = true;
+            li.innerHTML = `
+                <span class="player-number-badge w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-xs flex items-center justify-center font-bold text-slate-400 font-mono select-none">
+                    ${playerIdx + 1}
+                </span>
+                <div class="flex-1 flex items-center gap-2 overflow-hidden">
+                    <span class="player-name-span text-slate-200 font-medium truncate flex-1">${player}</span>
+                    <button onclick="removePlayer(${teamIdx}, ${playerIdx})" class="text-slate-600 hover:text-red-400 p-1 rounded transition-colors opacity-0 group-hover/item:opacity-100 focus:opacity-100" title="Delete">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                    <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-600 cursor-grab hover:text-slate-400"></i>
+                </div>
+            `;
+            container.appendChild(li);
+            lucide.createIcons();
+
+            const parentCard = container.closest('.glass-panel');
+            if (parentCard) {
+                // Scroll düzeltmesi
+                parentCard.parentElement.scrollTop = parentCard.parentElement.scrollHeight;
+            }
+            updateTeamCounts();
+        }
+
+        // --- Render Functions (Eski) ---
+        function renderTeams(teamsData) {
+            teamsList.innerHTML = '';
+            const t = translations[currentLang];
+
+            const gradients = [
+                { bg: 'from-blue-500/20 to-blue-600/5', border: 'border-blue-500/30', text: 'text-blue-300', dot: 'bg-blue-500', btnHover: 'hover:bg-blue-500/20', btnText: 'text-blue-300' },
+                { bg: 'from-rose-500/20 to-rose-600/5', border: 'border-rose-500/30', text: 'text-rose-300', dot: 'bg-rose-500', btnHover: 'hover:bg-rose-500/20', btnText: 'text-rose-300' },
+                { bg: 'from-amber-500/20 to-amber-600/5', border: 'border-amber-500/30', text: 'text-amber-300', dot: 'bg-amber-500', btnHover: 'hover:bg-amber-500/20', btnText: 'text-amber-300' },
+                { bg: 'from-emerald-500/20 to-emerald-600/5', border: 'border-emerald-500/30', text: 'text-emerald-300', dot: 'bg-emerald-500', btnHover: 'hover:bg-emerald-500/20', btnText: 'text-emerald-300' }
+            ];
+
+            teamsData.forEach((team, idx) => {
+                const style = gradients[idx % gradients.length];
+                let playersHtml = '';
+                // Başlangıçta boş render ediliyorsa burası boş kalacak
+                team.members.forEach((player, pIdx) => {
+                    playersHtml += `
+                        <li class="draggable-item flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 transition-colors group/item" draggable="true">
+                            <span class="player-number-badge w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-xs flex items-center justify-center font-bold text-slate-400 font-mono select-none">
+                                ${pIdx + 1}
+                            </span>
+                            <div class="flex-1 flex items-center gap-2 overflow-hidden">
+                                <span class="player-name-span text-slate-200 font-medium truncate flex-1">${player}</span>
+                                <button onclick="removePlayer(${idx}, ${pIdx})" class="text-slate-600 hover:text-red-400 p-1 rounded transition-colors opacity-0 group-hover/item:opacity-100 focus:opacity-100" title="Delete">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                                <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-600 cursor-grab hover:text-slate-400"></i>
+                            </div>
+                        </li>
+                    `;
+                });
+
+                const teamHtml = `
+                    <div class="team-container glass-panel rounded-2xl overflow-hidden shadow-lg border ${style.border} group hover:border-opacity-50 transition-all fade-in-up hover:transform hover:-translate-y-1 duration-300 flex flex-col h-full" style="animation-delay: ${idx * 100}ms">
+                        <div class="p-4 bg-gradient-to-r ${style.bg} border-b ${style.border} flex justify-between items-center">
+                            <h3 class="font-bold text-lg ${style.text} flex items-center gap-2 truncate pr-2" title="${team.name}">
+                                <span class="w-2 h-2 rounded-full ${style.dot} shadow-[0_0_10px_rgba(255,255,255,0.5)] flex-shrink-0"></span>
+                                <span class="team-name-display">${team.name}</span>
+                            </h3>
+                            <span class="player-count-badge text-xs bg-slate-900/60 text-slate-400 py-1 px-2.5 rounded-md border border-white/5 font-mono flex-shrink-0">
+                                ${team.members.length} ${t.player}
+                            </span>
+                        </div>
+                        <div class="p-4 bg-slate-900/20 flex-1 flex flex-col">
+                            <ul class="team-drop-zone flex-1 space-y-1">
+                                ${playersHtml}
+                            </ul>
+                            
+                            <div class="mt-3 pt-2 border-t border-white/5">
+                                <button id="btn-add-player-${idx}" onclick="showAddPlayerInput(${idx})" class="flex items-center justify-center gap-2 w-full py-2 rounded-lg border border-dashed border-slate-700 text-slate-500 ${style.btnHover} ${style.btnText} transition-all text-sm font-medium group-hover:border-opacity-50">
+                                    <i data-lucide="plus" class="w-3 h-3"></i>
+                                    ${t.addPlayerBtn}
+                                </button>
+                                
+                                <div id="input-group-player-${idx}" class="hidden flex gap-2 items-center">
+                                    <input 
+                                        id="input-player-${idx}" 
+                                        type="text" 
+                                        placeholder="${t.placeholderName}" 
+                                        class="glass-input flex-1 px-3 py-1.5 rounded-lg text-sm text-slate-200 placeholder-slate-500 outline-none focus:ring-1 focus:ring-indigo-500/50"
+                                        onkeydown="handleEnterKey(event, ${idx})"
+                                    >
+                                    <button onclick="confirmAddPlayer(${idx})" class="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors border border-emerald-500/20">
+                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="cancelAddPlayer(${idx})" class="p-1.5 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors border border-red-500/10">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                teamsList.insertAdjacentHTML('beforeend', teamHtml);
+            });
+            lucide.createIcons();
+        }
+
+        // --- Geçmiş ---
+        function addToHistory(detailedTeams) {
+            const newItem = { id: Date.now(), date: new Date().toISOString(), teams: JSON.parse(JSON.stringify(detailedTeams)) };
+            historyData.unshift(newItem);
+            if (historyData.length > 10) historyData.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (historyData.length > 0) {
+                historySection.classList.remove('hidden');
+                historyList.innerHTML = '';
+                const t = translations[currentLang];
+
+                historyData.forEach(item => {
+                    const dateStr = formatDate(item.date);
+                    let teamsSummary = '';
+                    item.teams.forEach(t => {
+                        teamsSummary += `
+                            <div class="text-sm">
+                                <span class="font-bold text-indigo-300">${t.name}:</span>
+                                <span class="text-slate-400 text-xs ml-1">${t.members.join(', ')}</span>
+                            </div>
+                        `;
+                    });
+
+                    const html = `
+                        <div class="glass-panel p-4 rounded-xl border-l-4 border-l-indigo-500/50 hover:bg-white/5 transition-colors">
+                            <div class="flex justify-between items-center mb-2 border-b border-white/5 pb-2">
+                                <span class="text-xs font-mono text-slate-500">${dateStr}</span>
+                                <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded">${item.teams.length} ${t.team}</span>
+                            </div>
+                            <div class="space-y-1">
+                                ${teamsSummary}
+                            </div>
+                        </div>
+                    `;
+                    historyList.insertAdjacentHTML('beforeend', html);
+                });
+            } else {
+                historySection.classList.add('hidden');
+            }
+        }
+
+        // --- Kopyalama ---
+        function copyToClipboard() {
+            updateTeamsFromDOM();
+            if (teams.length === 0) return;
+            const t = translations[currentLang];
+
+            let text = `🏆 *${t.appTitle.toUpperCase()}* 🏆\n\n`;
+            teams.forEach((team) => {
+                text += `*${team.name} (${team.members.length} ${t.person}):*\n`;
+                team.members.forEach(p => text += `• ${p}\n`);
+                text += `\n`;
+            });
+
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const originalText = copyText.textContent;
+                copyText.textContent = t.copied;
+                btnCopy.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+                btnCopy.classList.remove('bg-white/5', 'text-white', 'border-white/10');
+                setTimeout(() => {
+                    copyText.textContent = t.copy;
+                    btnCopy.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/30');
+                    btnCopy.classList.add('bg-white/5', 'text-white', 'border-white/10');
+                }, 2000);
+            } catch (err) { console.error('Error', err); }
+            document.body.removeChild(textArea);
+        }
+
+        // --- Event Listeners ---
+        playerInput.addEventListener('input', () => { updateUI(); saveData(); });
+
+        btnSample.addEventListener('click', () => {
+            playerInput.value = translations[currentLang].samplePlayers;
+            updateUI(); saveData();
+        });
+
+        btnClear.addEventListener('click', async () => {
+            const confirmed = await showConfirm(translations[currentLang].confirmClear);
+            if (confirmed) {
+                playerInput.value = '';
+                teams = [];
+                resultsContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                updateUI(); saveData();
+            }
+        });
+
+        btnClearHistory.addEventListener('click', async () => {
+            const confirmed = await showConfirm(translations[currentLang].confirmClearHistory);
+            if (confirmed) {
+                historyData = [];
+                renderHistory(); saveData();
+            }
+        });
+
+        btnGenerate.addEventListener('click', generateTeams);
+        btnCopy.addEventListener('click', copyToClipboard);
+
+        teamButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const newCount = parseInt(e.target.dataset.count);
+                teamCount = newCount;
+                const currentInputs = document.querySelectorAll('.team-name-input');
+                const existingNames = Array.from(currentInputs).map(i => i.value);
+                updateTeamButtons(teamCount);
+                renderTeamNameInputs(teamCount, existingNames);
+                updateUI(); saveData();
+            });
+        });
+
+        langBtn.addEventListener('click', () => {
+            setLanguage(currentLang === 'tr' ? 'en' : 'tr');
+        });
+
+        themeBtn.addEventListener('click', toggleTheme);
+
+        // Başlangıç
+        lucide.createIcons();
+        loadData();
+
+    </script>
+</body>
+
+</html>

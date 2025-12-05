@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şans Merkezi - Taş Kağıt Makas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="min-h-screen text-slate-100 selection:bg-purple-500 selection:text-white pb-20">
+    <div class="fixed top-0 left-0 w-full z-40 bg-slate-900/90 backdrop-blur-md border-b border-white/5 transition-colors duration-300"
+        id="mainNav">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html"
+                    class="flex items-center gap-2 font-bold text-xl tracking-tight shrink-0 mr-2 cursor-pointer text-decoration-none">
+                    <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-1.5 rounded-lg"><i
+                            data-lucide="clover" class="w-5 h-5 text-white"></i></div>
+                    <span
+                        class="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 hidden sm:block">Şans
+                        Merkezi</span>
+                </a>
+                <div class="flex items-center gap-1 flex-1 justify-center">
+                    <div class="nav-item"><a href="index.html" class="flex items-center gap-1"><i data-lucide="users"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Takım</span></a></div>
+                    <div class="nav-item"><a href="wheel.html" class="flex items-center gap-1"><i data-lucide="aperture"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Çark</span></a></div>
+                    <div class="nav-item"><a href="bomb.html" class="flex items-center gap-1"><i data-lucide="bomb"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Bomba</span></a></div>
+                    <div class="nav-item"><a href="dice.html" class="flex items-center gap-1"><i data-lucide="dice-5"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Zar</span></a></div>
+                    <div class="nav-item"><a href="coin.html" class="flex items-center gap-1"><i data-lucide="coins"
+                                class="w-4 h-4"></i><span class="hidden sm:inline">Para</span></a></div>
+                    <div class="relative">
+                        <div class="nav-item" onclick="toggleDropdown()"><span class="font-bold">Diğer</span> <i
+                                data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                        <div id="moreDropdown" class="dropdown-menu">
+                            <a href="bracket.html" class="nav-item"><i data-lucide="trophy" class="w-4 h-4"></i>
+                                Turnuva</a>
+                            <a href="straws.html" class="nav-item"><i data-lucide="align-vertical-distribute-end"
+                                    class="w-4 h-4"></i> Çöp Çek</a>
+                            <a href="bingo.html" class="nav-item"><i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                                Tombala</a>
+                            <a href="reaction.html" class="nav-item"><i data-lucide="zap" class="w-4 h-4"></i>
+                                Refleks</a>
+                            <a href="sounds.html" class="nav-item"><i data-lucide="volume-2" class="w-4 h-4"></i>
+                                Sesler</a>
+                            <div class="border-t border-white/10 my-1"></div>
+                            <a href="number.html" class="nav-item"><i data-lucide="binary" class="w-4 h-4"></i> Sayı</a>
+                            <a href="rps.html" class="nav-item"><i data-lucide="hand-metal" class="w-4 h-4"></i> TKM</a>
+                            <a href="card.html" class="nav-item"><i data-lucide="spade" class="w-4 h-4"></i> Kart</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0 ml-2">
+                    <button onclick="toggleTheme()"
+                        class="btn-glow w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                        <i data-lucide="sun" class="w-4 h-4 hidden" id="sunIcon"></i>
+                        <i data-lucide="moon" class="w-4 h-4" id="moonIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-4 pt-24 md:p-10 md:pt-28">
+        <section id="tool-rps" class="tool-section">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2">TKM</h1>
+            </header>
+            <div class="flex flex-col items-center max-w-lg mx-auto">
+                <div class="flex items-center justify-between w-full mb-10 px-4">
+                    <div class="text-center">
+                        <div id="userMoveDisplay"
+                            class="w-24 h-24 rounded-full glass-panel flex items-center justify-center text-5xl">?</div>
+                        <p class="mt-2 text-sm font-bold text-indigo-300">SEN</p>
+                    </div>
+                    <div class="text-2xl font-black text-slate-500 italic">VS</div>
+                    <div class="text-center">
+                        <div id="compMoveDisplay"
+                            class="w-24 h-24 rounded-full glass-panel flex items-center justify-center text-5xl">?</div>
+                        <p class="mt-2 text-sm font-bold text-rose-300">CPU</p>
+                    </div>
+                </div>
+                <div id="rpsResult" class="text-2xl font-bold text-white mb-8 min-h-[32px]">Seçimini Yap</div>
+                <div class="flex gap-3 md:gap-6"><button onclick="playRPS('rock')"
+                        class="glass-panel p-4 rounded-2xl hover:bg-white/10 hover:scale-110 transition-all flex flex-col items-center gap-2 w-24"><span
+                            class="text-3xl">🪨</span><span class="text-xs font-bold">Taş</span></button><button
+                        onclick="playRPS('paper')"
+                        class="glass-panel p-4 rounded-2xl hover:bg-white/10 hover:scale-110 transition-all flex flex-col items-center gap-2 w-24"><span
+                            class="text-3xl">📄</span><span class="text-xs font-bold">Kağıt</span></button><button
+                        onclick="playRPS('scissors')"
+                        class="glass-panel p-4 rounded-2xl hover:bg-white/10 hover:scale-110 transition-all flex flex-col items-center gap-2 w-24"><span
+                            class="text-3xl">✂️</span><span class="text-xs font-bold">Makas</span></button></div>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
