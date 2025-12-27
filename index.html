@@ -1350,7 +1350,7 @@
             if (teams.length === 0) return;
             const t = translations[currentLang];
 
-            let text = `🏆 *${t.appTitle.toUpperCase()}* 🏆\n\n`;
+            let text = `🏆AKT ile *${t.appTitle.toUpperCase()}* 🏆\n\n`;
             teams.forEach((team) => {
                 text += `*${team.name} (${team.members.length} ${t.person}):*\n`;
                 team.members.forEach(p => text += `• ${p}\n`);
